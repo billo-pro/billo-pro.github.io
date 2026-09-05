@@ -1,5 +1,5 @@
 # Guides
-Repository for RNG abuse guides by Billo.
+Repository for Pokemon Revolution Online content by Billo
 
 ## Credits
 
