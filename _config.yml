@@ -18,13 +18,13 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: RNG Guides
+title: PRO Guides
 email: BilloRNG@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
-  RNG guides by Billo
+  PRO Guides by Billo
 baseurl: ""
-url: "https://billo-guides.github.io"
-github_username:  Billo-Guides
+url: "https://billo-pro.github.io"
+github_username: billo-pro
 
 # host: 0.0.0.0
 
