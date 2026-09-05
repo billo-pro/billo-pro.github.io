@@ -1,0 +1,71 @@
+---
+layout: default
+title: Boss Fights
+permalink: /bosses/boss-fights/
+---
+
+<div class="title" style="background-color: #0c0038;">
+    <h1 class="text-light text-center pt-3 pb-3">Boss Fights</h1>
+</div>
+<small class="text-muted mb-3 mt-0">
+    Learn the common strategies to defeat any boss in the game!
+</small>
+<hr />
+
+<h5 span class="fw-bold">Introduction</h5>
+<p>Coming soon...</p>
+
+
+<div class="mb-3 w-100">
+    <div class="row row-cols-1">
+        <div class="col">
+            <label for="region-select">
+                <span class="fw-bold">Select a region:</span>
+            </label>
+
+            <select id="region-select" class="form-select">
+                <option value="">No region selected...</option>
+                <option value="kanto">Kanto!</option>
+                <option value="johto">Johto!</option>
+                <option value="hoenn">Hoenn!</option>
+                <option value="sinnoh">Sinnoh!</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div>
+    <div class="info info-kanto d-none">
+        {% include_relative kanto.html %}
+    </div>
+
+    <div class="info info-johto d-none">
+        {% include_relative johto.html %}
+    </div>
+
+    <div class="info info-hoenn d-none">
+        {% include_relative hoenn.html %}
+    </div>
+
+    <div class="info info-sinnoh d-none">
+        {% include_relative sinnoh.html %}
+    </div>
+</div>
+
+<script>
+    $("#region-select").change(() => {
+        let optionValue = $("#region-select").val();
+        $(".info").addClass("d-none");
+        $(".info-" + optionValue).removeClass("d-none");
+    });
+
+    $(document).on("change", ".gym-select", function () {
+        let region = $(this).data("region");   // reads whatever data-region is on the select that fired
+        let leader = $(this).val();             // reads whatever option was picked
+
+        $(".leader-info[class*='leader-info-" + region + "-']").addClass("d-none");
+        if (leader) {
+            $(".leader-info-" + region + "-" + leader).removeClass("d-none");
+        }
+    });
+</script>
