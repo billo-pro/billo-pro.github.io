@@ -1,0 +1,174 @@
+---
+layout: loader
+title: Rands Tracker
+permalink: /rands/tracker/
+---
+
+<div class="title" style="background-color: #0c0038;">
+    <h1 class="text-light text-center pt-3 pb-3">NABs Rands Tracker</h1>
+</div>
+<small class="text-muted mb-3 mt-0">
+    Quick and easy search tool for Random Battles
+</small>
+<hr />
+
+<form>
+    <div class="form-row">
+        <div class="col">
+            <label for="poke-search"><span class="fw-bold">Search by Pokemon name:</span></label>
+            <input type="text" id="poke-search" class="form-control">
+        </div>
+    </div>
+    <br />
+
+    <div class="form-group">
+        <label id="result-label" for="results">Results</label>
+
+        <div class="table-container border rounded" style="max-height: 600px; overflow: auto;">
+            <table class="table table-striped cloner-table text-center mb-0" style="border-collapse: separate; border-spacing: 0; width: 100%; white-space: nowrap;">
+                <thead class="table-dark" style="position: sticky; top: 0; z-index: 2;">
+                    <tr>
+                        <th scope="col">Dex</th>
+                        <th scope="col">Pokemon</th>
+                        <th scope="col">Type 1</th>
+                        <th scope="col">Type 2</th>
+                        <th scope="col">Level</th>
+                        <th scope="col">Item</th>
+                        <th scope="col">Ability</th>
+                        <th scope="col">Speed</th>
+                        <th scope="col">Move 1</th>
+                        <th scope="col">Move 2</th>
+                        <th scope="col">Move 3</th>
+                        <th scope="col">Move 4</th>
+                    </tr>
+                </thead>
+                <tbody id="results">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+{% include shared/scripts/gooss.html %}
+<script src="https://unpkg.com/fuse.js@6.4.1/dist/fuse.js" integrity="sha384-U2HBuKzcVBmu3+scbSdB3/MI2tVE2A4MBPwrhUxfh74ICJ5pybEyBoz7nXsY5Po0" crossorigin="anonymous"></script>
+
+<script>
+    // Store the Pokemon data once it is retrieved from the sheet
+    var pokes = [];
+
+    $(function () {
+        // Fetch data from the Google Sheet
+        gooss.data({
+            Pokes: {
+                url: "https://docs.google.com/spreadsheet/ccc?key=1_DNlRDGwyDeFB9Stze9pzD5NsF_qZEDTTBGg7e07r-g",
+                index: 0,
+            },
+        },
+            function (err, data) {
+                if (err) {
+                    console.error(err);
+                    alert(err);
+                    return;
+                }
+
+                // Store and sort the sheet data alphabetically by Pokemon
+                pokes = data.Pokes.sort(function (a, b) {
+                    var pokemonA = a["Pokemon"] || "";
+                    var pokemonB = b["Pokemon"] || "";
+
+                    return pokemonA.localeCompare(pokemonB);
+                });
+
+                // Update result count
+                updateResults(pokes.length);
+
+                // Page is ready
+                $("#loader").addClass("d-none");
+                $("#content").removeClass("d-none");
+                $("#footer").removeClass("d-none");
+
+                // Populate results table
+                var $results = $("#results");
+
+                for (var entry of pokes) {
+                    $results.append(formatEntry(entry));
+                }
+            }
+        );
+    });
+
+
+    // Search Pokemon
+    $("#poke-search").on("keyup", function () {
+        // Limit search input to 19 characters
+        var testArr = $("#poke-search").val().split("");
+        var resultArr = [];
+
+        for (var i in testArr) {
+            if (i < 19) {
+                resultArr.push(testArr[i]);
+            }
+        }
+
+        $("#poke-search").val(resultArr.join(""));
+
+        var searchValue = $("#poke-search").val().trim();
+        var $results = $("#results");
+
+        // Clear existing results
+        $results.html("");
+
+        // If search box is empty, show all Pokemon
+        if (searchValue === "") {
+            for (var entry of pokes) {
+                $results.append(formatEntry(entry));
+            }
+
+            updateResults(pokes.length);
+            return;
+        }
+
+        // Fuse fuzzy search
+        var options = {
+            includeScore: true,
+            threshold: 0.3,
+            keys: ["Pokemon"],
+        };
+
+        var fuse = new Fuse(pokes, options);
+        var search = fuse.search(searchValue);
+
+        // Display search results
+        for (var result of search) {
+            $results.append(formatEntry(result.item));
+        }
+
+        updateResults(search.length);
+    });
+
+
+    // Format a Pokemon entry into a table row
+    function formatEntry(entry) {
+        return "<tr>" +
+            "<td>" + (entry["Pokedex Number"] ? entry["Pokedex Number"] : "&mdash;") + "</td>" +
+            "<td>" + (entry["Pokemon"] ? entry["Pokemon"] : "&mdash;") + "</td>" +
+            "<td>" + (entry["Type 1"] ? entry["Type 1"] : "&mdash;") + "</td>" +
+            "<td>" + (entry["Type 2"] ? entry["Type 2"] : "&mdash;") + "</td>" +
+            "<td>" + (entry["Level"] ? entry["Level"] : "&mdash;") + "</td>" +
+            "<td>" + (entry["Item"] ? entry["Item"] : "&mdash;") + "</td>" +
+            "<td>" + (entry["Ability"] ? entry["Ability"] : "&mdash;") + "</td>" +
+            "<td>" + (entry["Speed"] ? entry["Speed"] : "&mdash;") + "</td>" +
+            "<td>" + (entry["Move 1"] ? entry["Move 1"] : "&mdash;") + "</td>" +
+            "<td>" + (entry["Move 2"] ? entry["Move 2"] : "&mdash;") + "</td>" +
+            "<td>" + (entry["Move 3"] ? entry["Move 3"] : "&mdash;") + "</td>" +
+            "<td>" + (entry["Move 4"] ? entry["Move 4"] : "&mdash;") + "</td>" +
+            "</tr>";
+    }
+
+
+    // Update result count
+    function updateResults(num) {
+        $("#result-label").html("Results (" + num + ")");
+    }
+</script>
