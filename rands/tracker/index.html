@@ -132,7 +132,7 @@ permalink: /rands/tracker/
         // Fuse fuzzy search
         var options = {
             includeScore: true,
-            threshold: 0.3,
+            threshold: 0.2,
             keys: ["Pokemon"],
         };
 
@@ -148,17 +148,31 @@ permalink: /rands/tracker/
     });
 
 
+    // Format Pokemon type icons
+    function formatType(type) {
+        if (!type) return "&mdash;";
+
+        var typeName = type.trim().toLowerCase().replace(/[^a-z]/g, "");
+
+        if (typeName === "shadow") {
+            return type;
+        }
+
+        return "<img alt=\"" + typeName + "\" title=\"" + type + "\" src=\"/images/types/" + typeName + ".png\" height=\"20\">";
+    }
+
+
     // Format a Pokemon entry into a table row
     function formatEntry(entry) {
         return "<tr>" +
             "<td>" + (entry["Pokedex Number"] ? entry["Pokedex Number"] : "&mdash;") + "</td>" +
-            "<td>" + (entry["Pokemon"] ? entry["Pokemon"] : "&mdash;") + "</td>" +
-            "<td>" + (entry["Type 1"] ? entry["Type 1"] : "&mdash;") + "</td>" +
-            "<td>" + (entry["Type 2"] ? entry["Type 2"] : "&mdash;") + "</td>" +
+            "<td><strong>" + (entry["Pokemon"] ? entry["Pokemon"] : "&mdash;") + "</strong></td>" +
+            "<td>" + formatType(entry["Type 1"]) + "</td>" +
+            "<td>" + formatType(entry["Type 2"]) + "</td>" +
             "<td>" + (entry["Level"] ? entry["Level"] : "&mdash;") + "</td>" +
             "<td>" + (entry["Item"] ? entry["Item"] : "&mdash;") + "</td>" +
             "<td>" + (entry["Ability"] ? entry["Ability"] : "&mdash;") + "</td>" +
-            "<td>" + (entry["Speed"] ? entry["Speed"] : "&mdash;") + "</td>" +
+            "<td style=\"color: #0645AD;\"><strong>" + (entry["Speed"] ? entry["Speed"] : "&mdash;") + "</strong></td>" +
             "<td>" + (entry["Move 1"] ? entry["Move 1"] : "&mdash;") + "</td>" +
             "<td>" + (entry["Move 2"] ? entry["Move 2"] : "&mdash;") + "</td>" +
             "<td>" + (entry["Move 3"] ? entry["Move 3"] : "&mdash;") + "</td>" +
