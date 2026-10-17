@@ -1,0 +1,181 @@
+---
+layout: loader
+title: PRO FAQ
+permalink: /faq/
+---
+
+<div class="title" style="background-color: #0c0038;">
+    <h1 class="text-light text-center pt-3 pb-3">FAQs for Pokemon Revolution Online</h1>
+</div>
+<small class="text-muted mb-3 mt-0">
+    Quick and easy search PRO FAQs
+</small>
+<hr />
+
+<form>
+    <div class="form-row">
+        <div class="col">
+            <label for="question-search"><span class="fw-bold">Search by question:</span></label>
+            <input type="text" id="question-search" class="form-control">
+        </div>
+    </div>
+    <br />
+
+    <div class="form-group">
+        <label id="result-label" for="results">Results</label>
+
+        <div class="table-container border rounded" style="max-height: 900px; overflow: auto;">
+            <table class="table table-striped cloner-table mb-0" style="border-collapse: separate; border-spacing: 0; width: 100%; white-space: normal;">
+                <thead class="table-dark" style="position: sticky; top: 0; z-index: 2;">
+                    <tr>
+                        <th scope="col" class="text-center" style="width: 20%;">Question</th>
+                        <th scope="col" style="width: 74%;">Answer</th>
+                        <th scope="col" class="text-center" style="width: 6%; white-space: nowrap;">Resource</th>
+                    </tr>
+                </thead>
+                <tbody id="results">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+{% include shared/scripts/gooss.html %}
+<script src="https://unpkg.com/fuse.js@6.4.1/dist/fuse.js" integrity="sha384-U2HBuKzcVBmu3+scbSdB3/MI2tVE2A4MBPwrhUxfh74ICJ5pybEyBoz7nXsY5Po0" crossorigin="anonymous"></script>
+
+<script>
+    // Store the Questions data once it is retrieved from the sheet
+    var questions = [];
+
+    $(function () {
+        // Fetch data from the Google Sheet
+        gooss.data({
+            Questions: {
+                url: "https://docs.google.com/spreadsheet/ccc?key=1Te5EqnYGPwepQcCm-f0RtqR-mYcBaFYGeIQcFgzAyVc",
+                index: 0,
+            },
+        },
+            function (err, data) {
+                if (err) {
+                    console.error(err);
+                    alert(err);
+                    return;
+                }
+
+                // Store and sort the sheet data alphabetically by Question
+                questions = data.Questions.sort(function (a, b) {
+                    var questionA = a["Question"] || "";
+                    var questionB = b["Question"] || "";
+
+                    return questionA.localeCompare(questionB);
+                });
+
+                // Update result count
+                updateResults(questions.length);
+
+                // Page is ready
+                $("#loader").addClass("d-none");
+                $("#content").removeClass("d-none");
+                $("#footer").removeClass("d-none");
+
+                // Populate results table
+                var $results = $("#results");
+
+                for (var entry of questions) {
+                    $results.append(formatEntry(entry));
+                }
+            }
+        );
+    });
+
+
+    // Search Questions
+    $("#question-search").on("keyup", function () {
+        // Limit search input to 19 characters
+        var testArr = $("#question-search").val().split("");
+        var resultArr = [];
+
+        for (var i in testArr) {
+            if (i < 19) {
+                resultArr.push(testArr[i]);
+            }
+        }
+
+        $("#question-search").val(resultArr.join(""));
+
+        var searchValue = $("#question-search").val().trim();
+        var $results = $("#results");
+
+        // Clear existing results
+        $results.html("");
+
+        // If search box is empty, show all Questions
+        if (searchValue === "") {
+            for (var entry of questions) {
+                $results.append(formatEntry(entry));
+            }
+
+            updateResults(questions.length);
+            return;
+        }
+
+        // Fuse fuzzy search
+        var options = {
+            includeScore: true,
+            threshold: 0.2,
+            keys: ["Question"],
+        };
+
+        var fuse = new Fuse(questions, options);
+        var search = fuse.search(searchValue);
+
+        // Display search results
+        for (var result of search) {
+            $results.append(formatEntry(result.item));
+        }
+
+        updateResults(search.length);
+    });
+
+
+    // Format Pokemon type icons
+    function formatType(type) {
+        if (!type) return "&mdash;";
+
+        var typeName = type.trim().toLowerCase().replace(/[^a-z]/g, "");
+
+        if (typeName === "shadow") {
+            return type;
+        }
+
+        return "<img alt=\"" + typeName + "\" title=\"" + type + "\" src=\"/images/types/" + typeName + ".png\" height=\"20\">";
+    }
+
+
+    // Format a Question entry into a table row
+    function formatEntry(entry) {
+        var resource = entry["Resource"];
+
+        if (!resource) {
+            resource = "&mdash;";
+        } else if (!/<a\s/i.test(resource)) {
+            // Replace any URL with a clickable "Link"
+            resource = resource.replace(/(https?:\/\/[^\s,<>"]+)/g, function (url) {
+                return "<a href=\"" + url + "\" target=\"_blank\" rel=\"noopener noreferrer\">Link</a>";
+            });
+        }
+
+        return "<tr>" +
+            "<td class=\"text-center align-middle\"><strong>" + (entry["Question"] ? entry["Question"] : "&mdash;") + "</strong></td>" +
+            "<td>" + (entry["Answer"] ? entry["Answer"] : "&mdash;") + "</td>" +
+            "<td class=\"text-center align-middle\">" + resource + "</td>" +
+            "</tr>";
+    }
+
+
+    // Update result count
+    function updateResults(num) {
+        $("#result-label").html("Results (" + num + ")");
+    }
+</script>
