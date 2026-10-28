@@ -29,6 +29,6 @@ github_username: billo-pro
 # host: 0.0.0.0
 
 plugins:
-  - jekyll-avatar
+  - jekyll-titles-from-headings
   - jekyll-github-metadata
   - jekyll-seo-tag
